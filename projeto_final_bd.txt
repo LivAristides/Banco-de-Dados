@@ -1,0 +1,216 @@
+-------------------
+Introdução
+-------------------
+Nosso projeto se trata de um banco de dados para uma loja de roupas, onde o cliente é o publico alvo. Dessa forma, poderão fazer compras de uma forma mais prática, focando na usabilidade, buscando e consultando os produtos disponíveis, indisponíveis, tamanhos, cores, tipos etc.
+-----------------
+
+create database loja_roupa;
+
+CREATE TABLE Cliente (
+    id_cliente INT PRIMARY KEY,
+    nome_cliente VARCHAR(100),
+    email VARCHAR(100),
+    telefone VARCHAR(15));
+
+insert into Cliente values (01, "Livia Aristides", "liviaaristides@gmail.com", "(11)972229015");
+insert into Cliente values (02, "Daniela Ribas", "daniribas@gmail.com", "(11)985234598");
+insert into Cliente values (03, "Gustavo Oliveira", "gustavooloiveira@gmail.com", "(11)92347899102");
+
+
+CREATE TABLE Produto (
+    id_produto INT PRIMARY KEY,
+    nome_produto VARCHAR(100),
+    preco VARCHAR(10),
+    tipo Varchar(100),
+    quantidade_estoque INT);
+
+insert into Produto values (04, " Blusa Cropped Preto", "R$49,90", "Cropped", 55);
+insert into Produto values (05, " Calça WideLeg Branca", "R$119,90", "Calça", 36);
+insert into Produto values (06, " Vestido Longo Listrado", "R$89,90", "Vestido", 15);
+
+CREATE TABLE Compra (
+    id_compra INT PRIMARY KEY,
+    data_compra VARCHAR (10),
+    valor_compra Varchar(10),
+    id_cliente INT,
+    FOREIGN KEY (id_cliente) REFERENCES Cliente(id_cliente));
+
+insert into Compra values (07, "12/11/23", "R$89,90", 01);
+insert into Compra values (08, "07/11/23", "R$208,90", 03);
+insert into Compra values (09, "21/09/23", "R$49,90", 02);
+
+
+CREATE TABLE ItemCompra (
+    id_item INT PRIMARY KEY,
+    quantidade_comprada INT,
+    preco_unitario VARCHAR(10),
+    id_compra INT,
+    id_produto INT,
+    FOREIGN KEY (id_compra) REFERENCES Compra(id_compra),
+    FOREIGN KEY (id_produto) REFERENCES Produto(id_produto));
+
+insert into ItemCompra values (10, 1, "R$49,90", 09, 04);
+insert into ItemCompra values (11, 1, "R$89,90", 07, 06);
+insert into ItemCompra values (12, 2, "R$119,90", 08, 05);
+
+
+CREATE TABLE Funcionario (
+    id_funcionario INT PRIMARY KEY,
+    nome_funcionario VARCHAR(100),
+    cargo VARCHAR(50));
+
+insert into Funcionario values (13, "Giovana Fadini", "Caixa");
+insert into Funcionario values (14, "Marcio Ferraz", "Atendente");
+insert into Funcionario values (15, "André Vacilotto", "Gerente");
+
+============================================
+SELECT
+============================================
+select * from Cliente;
+select nome_cliente, telefone from Cliente;
+select*from Cliente where telefone="(11)972229015";
+select nome_cliente from Cliente where id_cliente = 01;
+
+ 
+
+select * from produto;
+select nome_produto, preco from Produto;
+select*from Produto where preco= "R$119,90";
+select nome_produto from Produto where id_produto = 05;
+
+ 
+
+select * from Compra;
+select data_compra, id_cliente from Compra;
+select*from Compra where id_cliente= 02;
+select data_compra from Compra where id_compra = 09;
+
+ 
+================================================
+JOIN
+================================================
+
+SELECT c.nome_cliente, cp.id_compra, 
+FROM Cliente as c
+INNER JOIN Compra as cp on c.id_cliente = cp.id_cliente
+ 
+SELECT c.nome_cliente, cp.data_compra
+FROM Cliente as c
+LEFT JOIN Compra as cp on c.id_cliente = cp.id_cliente
+ 
+SELECT p.nome_produto, i.quantidade_comprada
+FROM Produto as p
+RIGHT JOIN ItemCompra as i 
+on p.id_produto = i.id_produto
+
+ 
+===========================================
+UPDATE
+======================================
+update Cliente
+set email="liviaoliveira@gmail.com" 
+where id_cliente= "01";
+
+ 
+
+update Produto
+set nome_produto="Calça Skiny" 
+where id_produto= "05";
+ 
+update Compra
+set data_compra="02/10/23" 
+where id_compra= "08";
+
+ 
+
+====================================
+SUBCONSULTA
+===================================
+
+select nome_cliente, email, telefone
+from Cliente 
+where id_cliente in(select id_cliente
+from Compra
+where id_cliente=01);
+ 
+select nome_produto, preco, tipo
+From Produto
+where exists(select*
+from Compra
+where id_compra="08"
+and id_produto=Produto.id_produto);
+ 
+=================================
+PROCEDURE
+================================
+
+DELIMITER &&
+CREATE PROCEDURE sp_Cliente_inserir ( 
+IN var_codigo TINYINT, 
+var_nome VARCHAR(100), 
+var_email VARCHAR(100),
+var_telefone VARCHAR (15)) 
+BEGIN
+REPLACE INTO Cliente VALUES (var_codigo,var_nome,var_email, var_telefone); 
+END
+&&
+
+call sp_Cliente_inserir(20, “Livia Oliveira”, “livia@gmail.com”, "(11)973654726");
+ 
+
+
+
+DELIMITER $$
+     CREATE PROCEDURE sp_Cliente_listar(IN var_codigo TINYINT) 
+     BEGIN 
+      IF(var_codigo IS NULL) THEN 
+        SELECT id_cliente,nome_cliente,telefone FROM Cliente; 
+ELSE
+  SELECT id_cliente,nome_cliente,email  FROM Cliente where ID_CLIENTE=VAR_CODIGO;
+END IF; 
+   END $$         
+CALL sp_Cliente_listar(1); 
+CALL sp_Cliente_listar(null); 
+
+ 
+
+ 
+DELIMITER $$
+CREATE PROCEDURE sp_Produto_excluir(IN var_codigo TINYINT)
+BEGIN
+DELETE FROM Produto WHERE id_produto = var_codigo;
+END $$
+
+CALL sp_Produto_excluir(1);
+ 
+========================================
+DELETE
+======================================
+delete from Cliente where id_cliente = 02;
+ 
+delete from Produto where id_Produto = 06;
+ 
+=====================================
+ALTER TABLE
+======================================
+
+ALTER TABLE Cliente
+ADD COLUMN cpf VARCHAR (15);
+ 
+ALTER TABLE Produto
+ADD COLUMN cor VARCHAR (50);
+ 
+
+ALTER TABLE Funcionario
+ADD COLUMN endereco VARCHAR (100);
+
+ 
+ 
+
+
+
+
+
+
+
+
